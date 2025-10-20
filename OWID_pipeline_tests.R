@@ -16,7 +16,7 @@ assertthat::assert_that(
 share_below_half_median <- function(
   data_list,
   var_name,
-  wgt_name,
+  wgt_name = NULL,
   type = c("type_4", "type_2"),
   na.rm = TRUE
 ) {
@@ -118,8 +118,8 @@ prep_data <- purrr::map(
     filter(!is.na(dhi)) %>%
     mutate(new_wgt = hwgt * nhhmem)
 ) %>%
-  apply_iqr_top_bottom_coding("dhi", "hwgt", times = 3, type = "type_2") %>% # type = "type_2" ?
-  apply_iqr_top_bottom_coding("mi", "hwgt", times = 3, type = "type_2") %>% # type = "type_2" ?
+  apply_iqr_top_bottom_coding("dhi", "hwgt", times = 3, type = "type_4") %>% # type = "type_2" ?
+  apply_iqr_top_bottom_coding("mi", "hwgt", times = 3, type = "type_4") %>% # type = "type_2" ?
   apply_sqrt_equivalisation("dhi") %>% # purrr::map( ~ .x %>% mutate(dhi = dhi / nhhmem)) %>% 
   apply_sqrt_equivalisation("mi") # # purrr::map( ~ .x %>% mutate(mi = mi / nhhmem))
 
@@ -130,18 +130,18 @@ prep_data_ppp_adj <- purrr::map(
     filter(!is.na(dhi)) %>%
     mutate(new_wgt = hwgt * nhhmem)
 ) %>%
-  apply_ppp_adjustment("dhi", transformation = "lisppp", database = "lis") %>%
-  apply_ppp_adjustment("mi", transformation = "lisppp", database = "lis") %>%
-  apply_iqr_top_bottom_coding("dhi", "hwgt", times = 3, type = "type_2") %>% # type = "type_2" ?
-  apply_iqr_top_bottom_coding("mi", "hwgt", times = 3, type = "type_2") %>% # type = "type_2" ?
+  apply_ppp_adjustment("dhi", transformation = "lisppp", database = "lis", base_year_ppp = 2017) %>%
+  apply_ppp_adjustment("mi", transformation = "lisppp", database = "lis", base_year_ppp = 2017) %>%
+  apply_iqr_top_bottom_coding("dhi", "hwgt", times = 3, type = "type_4") %>% # type = "type_2" ?
+  apply_iqr_top_bottom_coding("mi", "hwgt", times = 3, type = "type_4") %>% # type = "type_2" ?
   apply_sqrt_equivalisation("dhi") %>%
   apply_sqrt_equivalisation("mi") 
 # in terms of the preparation, we are on a very good path of alignment with OWID figures computed in Stata.
 
 
 
-# Aggregate Figures  --------------------------------------
 
+# Aggregate Figures (Inequalities)  --------------------------------------
 gini <- prep_data %>% #list
   run_weighted_gini("dhi", "new_wgt") %>% # dedicated function, that only asks for a variable and a weight
   structure_to_plot() %>% # Function to restructure a list into a tidy data frame
@@ -215,6 +215,27 @@ ratio_50_10 <- prep_data %>%
   mutate(indicator = "Ratio p50_p10", variable = "dhi", equiv = "square root")
 
 
+
+# Bind first set of indicators 
+inequality_data <- list(
+  gini,
+  share_richest_10,
+  share_poorest_50,
+  palma_ratio,
+  share_below_50_median,
+  ratio_90_10,
+  ratio_90_50,
+  ratio_50_10
+) %>%
+  bind_rows()
+
+write_csv(inequality_data, "S:\\Staff\\Goncalo\\2025\\pipeline_OWID\\outputs\\inequality.csv")
+
+
+
+
+
+# Aggregate Figures (Incomes across the Distribution)  --------------------------------------
 average <- prep_data_ppp_adj %>%
   run_weighted_mean("dhi", "new_wgt") %>%
   structure_to_plot() %>%
@@ -247,7 +268,8 @@ deciles_shares <- prep_data %>%
     indicator = str_c("decile_shares_p_", str_sub(category, 1, -2)),
     variable = "dhi",
     equiv = "square root"
-  )
+  ) %>%
+  select(-category)
 
 deciles_mean <- prep_data_ppp_adj %>%
   run_weighted_percentiles(
@@ -261,7 +283,8 @@ deciles_mean <- prep_data_ppp_adj %>%
     indicator = str_c("decile_averages_p_", str_sub(category, 1, -2)),
     variable = "dhi",
     equiv = "square root"
-  )
+  ) %>%
+  select(-category) 
 
 
 percentiles <- prep_data_ppp_adj %>%
@@ -286,7 +309,8 @@ percentiles_shares <- prep_data %>%
     indicator = str_c("percentile_shares_p_", str_sub(category, 1, -2)),
     variable = "dhi",
     equiv = "square root"
-  )
+  ) %>%
+  select(-category)
 
 percentiles_mean <- prep_data_ppp_adj %>%
   run_weighted_percentiles(
@@ -300,10 +324,32 @@ percentiles_mean <- prep_data_ppp_adj %>%
     indicator = str_c("percentile_averages_p_", str_sub(category, 1, -2)),
     variable = "dhi",
     equiv = "square root"
-  )
+  ) %>%
+  select(-category)
 
 
-# Poverty (relative) thresholds as percentage of the median  --------------------------------
+
+# Bind second set of indicators
+
+incomes_across_distribution <- list(
+  average,
+  median,
+  deciles,
+  deciles_shares,
+  deciles_mean,
+  percentiles,
+  percentiles_shares,
+  percentiles_mean
+) %>%
+  bind_rows()
+
+write_csv(incomes_across_distribution, "S:\\Staff\\Goncalo\\2025\\pipeline_OWID\\outputs\\incomes_across_distribution.csv")
+
+
+
+
+
+# Aggregate Figures - Poverty (relative) thresholds as percentage of the median  --------------------------------
 
 thresholds <- c(
   0.4,
@@ -332,51 +378,86 @@ relative_poverty_rate <- bind_rows(results)
 
 
 
+# average_poverty_shortfall_relt_to_median
 
-
-# average_poverty_shortfall_relt_to_median 
-run_weighted_poverty_shortfall(
-  prep_data,
-  var_name = "dhi",
-  wgt_name = "new_wgt",
-  times_median = line,
-  percent = FALSE
-) %>%
-  mutate(
-    indicator = str_c("average_poverty_shortfall_relt_to_median_", line),
-    variable = "dhi",
-    equiv = "square root"
-  )
+results <- list()
+for (line in thresholds) {
+  a <- run_weighted_poverty_shortfall(
+    prep_data,
+    var_name = "dhi",
+    wgt_name = "new_wgt",
+    times_median = line,
+    percent = FALSE
+  ) %>%
+    structure_to_plot() %>%
+    mutate(
+      indicator = str_c("average_poverty_shortfall_relt_to_median_", line),
+      variable = "dhi",
+      equiv = "square root"
+    )
+  results[[as.character(line)]] <- a
+}
+average_poverty_shortfall_relt_to_median <- bind_rows(results)
 
 # percentage_poverty_shortfall_relt_to_median
-run_weighted_poverty_shortfall(
-  prep_data,
-  var_name = "dhi",
-  wgt_name = "new_wgt",
-  times_median = line,
-  percent = TRUE
-) %>%
-  mutate(
-    indicator = str_c("percentage_poverty_shortfall_relt_to_median_", line),
-    variable = "dhi",
-    equiv = "square root"
-  )
+
+results <- list()
+for (line in thresholds) {
+  a <- run_weighted_poverty_shortfall(
+    prep_data,
+    var_name = "dhi",
+    wgt_name = "new_wgt",
+    times_median = line,
+    percent = TRUE
+  ) %>%
+    structure_to_plot() %>%
+    mutate(
+      indicator = str_c("percentage_poverty_shortfall_relt_to_median_", line),
+      variable = "dhi",
+      equiv = "square root"
+    )
+  results[[as.character(line)]] <- a
+}
+
+percentage_poverty_shortfall_relt_to_median <- bind_rows(results)
 
 # relative_poverty_gap_index
-run_weighted_poverty_gap_index(
+
+results <- list()
+for (line in thresholds) {
+a <- run_weighted_poverty_gap_index(
   prep_data,
   var_name = "dhi",
   wgt_name = "new_wgt",
   times_median = line
 ) %>%
+  structure_to_plot() %>%
   mutate(
     indicator = str_c("relative_poverty_gap_index_", line),
     variable = "dhi",
     equiv = "square root"
   )
+  results[[as.character(line)]] <- a
+}
+
+relative_poverty_gap_index <- bind_rows(results)
 
 
-# Poverty (absolute) thresholds as daily monetary threshold in international dollars at 2017 PPPs -----------------------
+# Bind third set of indicators
+
+relative_poverty_figures <- list(
+  relative_poverty_rate,
+  average_poverty_shortfall_relt_to_median,
+  percentage_poverty_shortfall_relt_to_median,
+  relative_poverty_gap_index
+) %>%
+  bind_rows()
+
+write_csv(relative_poverty_figures, "S:\\Staff\\Goncalo\\2025\\pipeline_OWID\\outputs\\relative_poverty.csv")
+
+
+
+# Aggregate Figures - Poverty (absolute) thresholds as daily monetary threshold in international dollars at 2017 PPPs -----------------------
 
 poverty_lines <- c(
   2.15,
@@ -406,25 +487,15 @@ for (line in poverty_lines) {
       equiv = "square root"
     )
   results[[as.character(line)]] <- a
+  print(paste0("Done absolute_poverty_rate: ", line))
 }
-final_df <- bind_rows(results)
+absolute_poverty_rate <- bind_rows(results)
 
 
 
-run_weighted_absolute_poverty(
-  prep_data_ppp_adj,
-  var_name = "dhi",
-  wgt_name = "new_wgt",
-  daily_poverty_line = line
-) %>%
-  structure_to_plot() %>%
-  mutate(
-    indicator = str_c("absolute_poverty_rate_", line),
-    variable = "dhi",
-    equiv = "square root"
-  )
-
-run_weighted_poverty_shortfall(
+results <- list()
+for (line in poverty_lines) {
+  a <- run_weighted_poverty_shortfall(
   prep_data_ppp_adj,
   var_name = "dhi",
   wgt_name = "new_wgt",
@@ -437,7 +508,15 @@ run_weighted_poverty_shortfall(
     variable = "dhi",
     equiv = "square root"
   )
-run_weighted_poverty_shortfall(
+  results[[as.character(line)]] <- a
+  print(paste0("Done average_poverty_shortfall_abs: ", line))
+}
+average_poverty_shortfall_abs <- bind_rows(results)
+
+
+results <- list()
+for (line in poverty_lines) { 
+  a <- run_weighted_poverty_shortfall(
   prep_data_ppp_adj,
   var_name = "dhi",
   wgt_name = "new_wgt",
@@ -450,9 +529,16 @@ run_weighted_poverty_shortfall(
     variable = "dhi",
     equiv = "square root"
   )
+  results[[as.character(line)]] <- a
+  print(paste0("Done percentage_poverty_shortfall_abs: ", line))
+}
+percentage_poverty_shortfall_abs <- bind_rows(results)
 
 
-run_weighted_poverty_gap_index(
+
+results <- list()
+for (line in poverty_lines) { 
+  a <- run_weighted_poverty_gap_index(
   prep_data_ppp_adj,
   var_name = "dhi",
   wgt_name = "new_wgt",
@@ -464,5 +550,20 @@ run_weighted_poverty_gap_index(
     variable = "dhi",
     equiv = "square root"
   )
+  results[[as.character(line)]] <- a
+  print(paste0("Done absolute_poverty_gap_index: ", line))
+}
+absolute_poverty_gap_index <- bind_rows(results)
 
 
+# Bind fourth set of indicators
+
+absolute_poverty_figures <- list(
+  absolute_poverty_rate,
+  average_poverty_shortfall_abs,
+  percentage_poverty_shortfall_abs,
+  absolute_poverty_gap_index
+) %>%
+  bind_rows()
+
+write_csv(absolute_poverty_figures, "S:\\Staff\\Goncalo\\2025\\pipeline_OWID\\outputs\\absolute_poverty.csv")
