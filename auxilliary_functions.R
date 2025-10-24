@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> f353bb89a01b034a911a0cde95f08ee8923d0ef6
 # Auxilliary function `share_below_half_median()` non-existing in lissyrtools ------------------------------
 
 share_below_half_median <- function(
@@ -212,4 +216,8 @@ output_run_poverty_shortfall_relative <- purrr::imap(
     output_run_poverty_shortfall_relative
   )
   return(output_run_poverty_shortfall_relative)
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> f353bb89a01b034a911a0cde95f08ee8923d0ef6
