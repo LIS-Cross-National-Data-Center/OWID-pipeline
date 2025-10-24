@@ -16,8 +16,11 @@ assertthat::assert_that(
   packageVersion("lissyrtools") == lissyrtools::check_github_version()
 ) # if TRUE we are sure to be working with the most updated set of countries and datasets as well.
 
+# Paths 
+source("path_definer.R")
+
 # Import auxilliary functions
-source("S:\\Projects\\2025-OWID-Pipeline\\OWID-pipeline\\auxilliary_functions.R")
+source("auxilliary_functions.R")
 
 
 # Loading the data  ---------------------------------------------------------------
@@ -113,7 +116,7 @@ prep_data_ppp_adj_2021 <- purrr::map(
 # Computation of aggregate figures ------------------------------------------------
 
 
-source("S:\\Projects\\2025-OWID-Pipeline\\OWID-pipeline\\1_dhi_eqv.R")
-source("S:\\Projects\\2025-OWID-Pipeline\\OWID-pipeline\\2_dhi_pc.R")
-source("S:\\Projects\\2025-OWID-Pipeline\\OWID-pipeline\\3_mi_eqv.R")
-source("S:\\Projects\\2025-OWID-Pipeline\\OWID-pipeline\\4_mi_pc.R")
+source("1_dhi_eqv.R")
+source("2_dhi_pc.R")
+source("3_mi_eqv.R")
+source("4_mi_pc.R")

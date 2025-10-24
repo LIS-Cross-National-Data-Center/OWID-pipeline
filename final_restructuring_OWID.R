@@ -5,7 +5,7 @@
 
   # 0) ------------- Import output files ---------------------------------
 
-path <- "S:\\Projects\\2025-OWID-Pipeline\\outputs"
+path <- output_path_int
 csv_files <- list.files(path, pattern = "\\.csv$", full.names = TRUE)
 
 
@@ -14,7 +14,7 @@ data <- lapply(csv_files, read_csv)
 # Name each list element with the file name (without .csv)
 names(data) <- tools::file_path_sans_ext(basename(csv_files))
 
-
+today_date <- stringr::str_replace_all(today(), "-", "_")
 
  # -----------------------------------------------------------------------
 
@@ -23,6 +23,8 @@ names(data) <- tools::file_path_sans_ext(basename(csv_files))
 ineq <-  data[str_detect(names(data),"inequality")] %>% 
   bind_rows()  %>% 
   select(-year_ppp)
+
+write_csv(ineq, paste0(output_path_OWID, paste0("inequality_", today_date, ".csv")))
 
   # 2) -------------
 
@@ -44,11 +46,16 @@ final_incomes <- left_join(
 ) %>% 
   filter(!(str_starts(indicator, "p")))
 
+
+write_csv(final_incomes, paste0(output_path_OWID, paste0("incomes_", today_date, ".csv")))
+
   # 3) -------------
 
-relat <- data[str_detect(names(data),"relat")] %>% 
+relative_pov <- data[str_detect(names(data),"relat")] %>% 
   bind_rows()  %>% 
   select(-year_ppp)
+
+write_csv(relative_pov, paste0(output_path_OWID, paste0("relative_poverty_", today_date, ".csv")))
 
   # 4) -------------
 
@@ -68,5 +75,5 @@ final_abs_pov <- left_join(
 ) %>% 
   filter(!(str_detect(indicator, "2.15|3.65|6.85")))
 
-
+write_csv(final_abs_pov, paste0(output_path_OWID, paste0("absolute_poverty_", today_date, ".csv")))
 

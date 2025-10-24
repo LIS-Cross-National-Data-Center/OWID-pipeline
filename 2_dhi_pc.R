@@ -87,7 +87,7 @@ inequality_data <- list(
 ) %>%
   bind_rows() %>% mutate(variable = "dhi", equiv = "per capita", year_ppp = 2017)
 
-write_csv(inequality_data, "S:\\Projects\\2025-OWID-Pipeline\\outputs\\inequality_dhi_pc.csv")
+write_csv(inequality_data, paste0(output_path_int, "inequality_dhi_pc.csv"))
 
 
 
@@ -177,7 +177,7 @@ incomes_across_distribution <- list(
 ) %>%
   bind_rows() %>% mutate(variable = "dhi", equiv = "per capita", year_ppp = 2017)
 
-write_csv(incomes_across_distribution, "S:\\Projects\\2025-OWID-Pipeline\\outputs\\incomes_across_distribution_dhi_pc.csv")
+write_csv(incomes_across_distribution, paste0(output_path_int, "incomes_across_distribution_dhi_pc.csv"))
 
 
 
@@ -305,7 +305,7 @@ relative_poverty_figures <- list(
 ) %>%
   bind_rows() %>% mutate(variable = "dhi", equiv = "per capita", year_ppp = 2017)
 
-write_csv(relative_poverty_figures, "S:\\Projects\\2025-OWID-Pipeline\\outputs\\relative_poverty_dhi_pc.csv")
+write_csv(relative_poverty_figures, paste0(output_path_int, "relative_poverty_dhi_pc.csv"))
 
 
 
@@ -440,7 +440,7 @@ absolute_poverty_figures <- list(
 ) %>%
   bind_rows() %>% mutate(variable = "dhi", equiv = "per capita", year_ppp = 2017)
 
-write_csv(absolute_poverty_figures, "S:\\Projects\\2025-OWID-Pipeline\\outputs\\absolute_poverty_dhi_pc.csv")
+write_csv(absolute_poverty_figures, paste0(output_path_int, "absolute_poverty_dhi_pc.csv"))
 
 
 
@@ -508,7 +508,7 @@ incomes_across_distribution_21 <- list(
 ) %>%
   bind_rows() %>% mutate(variable = "dhi", equiv = "per capita", year_ppp = 2021)
 
-write_csv(incomes_across_distribution_21, "S:\\Projects\\2025-OWID-Pipeline\\outputs\\incomes_across_distribution_21_dhi_pc.csv")
+write_csv(incomes_across_distribution_21, paste0(output_path_int, "incomes_across_distribution_21_dhi_pc.csv"))
 
 
 # 6) Poverty (absolute) thresholds as daily monetary threshold in international dollars at 2021 PPPs -----------------------
@@ -639,5 +639,5 @@ absolute_poverty_figures_21 <- list(
 ) %>%
   bind_rows() %>% mutate(variable = "dhi", equiv = "per capita", year_ppp = 2021)
 
-write_csv(absolute_poverty_figures_21, "S:\\Projects\\2025-OWID-Pipeline\\outputs\\absolute_poverty_21_dhi_pc.csv")
 
+write_csv(absolute_poverty_figures_21, paste0(output_path_int, "absolute_poverty_21_dhi_pc.csv"))
