@@ -22,7 +22,10 @@ source("path_definer.R")
 # Import auxilliary functions
 source("auxilliary_functions.R")
 
-log_file <- file("log\\log_file.txt", open = "wt")
+
+log_file_name <- paste0("log_file_", stringr::str_replace_all(today(), "-", "_"), ".txt")
+log_file_path <- file.path("log", log_file_name)
+log_file <- file(log_file_path, open = "wt")
 sink(log_file, split = TRUE, type = "output")
 sink(log_file, type = "message")
 
@@ -80,4 +83,4 @@ paste0(format(Sys.time(), "%d-%B-%Y %H:%M:%S"))
 paste0("==============================")
 
 sink()
-sink()
+sink(type = "message")
