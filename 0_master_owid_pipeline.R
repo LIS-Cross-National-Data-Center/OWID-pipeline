@@ -13,9 +13,9 @@ library(tictoc)
 library(furrr)
 
 # check if the package version is the most updated one
-# assertthat::assert_that(
-#   packageVersion("lissyrtools") == lissyrtools::check_github_version()
-# ) # if TRUE we are sure to be working with the most updated set of countries and datasets as well.
+ assertthat::assert_that(
+   packageVersion("lissyrtools") == lissyrtools::check_github_version()
+ ) # if TRUE we are sure to be working with the most updated set of countries and datasets as well.
 
 # Paths 
 source("path_definer.R")

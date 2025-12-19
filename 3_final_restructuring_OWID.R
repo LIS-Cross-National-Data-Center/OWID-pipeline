@@ -15,6 +15,31 @@ file.rename(
 )
 
 
+# Check that all the files in output_path_int (that must have been rewritten in 2.1 2.2 2.3 and 2.4) are from today. 
+
+check_csvs_today <- function(folder) {
+  files <- list.files(folder, pattern = "\\.csv$", full.names = TRUE)
+
+  if (length(files) == 0) {
+    stop("No CSV files found in the folder.")
+  }
+
+  file_dates <- as.Date(file.info(files)$mtime)
+
+  if (!all(file_dates == Sys.Date())) {
+    bad_files <- files[file_dates != Sys.Date()]
+    stop(
+      "These CSV files are NOT from today:\n",
+      paste(basename(bad_files), collapse = "\n")
+    )
+  }
+
+  print("All CSV files in output_path_int are from today.")
+  invisible(TRUE)
+}
+check_csvs_today(output_path_int)
+
+
 csv_files_new <- list.files(output_path_int, pattern = "\\.csv$", full.names = TRUE)
 
 data <- lapply(csv_files_new, function(file) {
@@ -62,8 +87,9 @@ print(paste0("relative_poverty_", today_date, ".csv", " finished on ", format(Sy
 
 abs_pov <- data[str_detect(names(data),"abs")] %>% 
   bind_rows() %>% 
-  filter(!(str_detect(indicator, "3$|4\\.2$|8\\.3$"))) %>%  # "2.15|3.65|6.85" --> 2017 ppp WB thresholds
-  select(-year_ppp)
+  select(-year_ppp)                 
+  #filter(!(str_detect(indicator, "3$|4\\.2$|8\\.3$"))) %>%  # "2.15|3.65|6.85" --> 2017 ppp WB thresholds
+  
 
 write_csv(abs_pov, paste0(output_path_OWID, paste0("absolute_poverty_", today_date, ".csv")))
 print(paste0("absolute_poverty_", today_date, ".csv", " finished on ", format(Sys.time(), "%d-%B-%Y %H:%M:%S")))

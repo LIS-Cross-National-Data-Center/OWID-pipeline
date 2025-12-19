@@ -56,7 +56,8 @@ prep_data <- purrr::map(
   purrr::map( ~ .x %>% mutate(dhi_pc = dhi / nhhmem)) %>% 
   purrr::map( ~ .x %>% mutate(mi_pc = mi / nhhmem)) %>% 
   apply_sqrt_equivalisation("dhi") %>% 
-  apply_sqrt_equivalisation("mi") 
+  apply_sqrt_equivalisation("mi") %>% 
+  map(~ .x %>% select(-hifactor, -hi33, -hiprivate, -currency, -grossnet, -hwgt, -hwgta))
 
 print(paste0("Preparation of the data without PPP adjustment, finished on ", format(Sys.time(), "%d-%B-%Y %H:%M:%S")))
 
@@ -81,7 +82,9 @@ prep_data_ppp_adj <- purrr::map(
   purrr::map( ~ .x %>% mutate(dhi_pc = dhi / nhhmem)) %>% 
   purrr::map( ~ .x %>% mutate(mi_pc = mi / nhhmem)) %>% 
   apply_sqrt_equivalisation("dhi") %>%
-  apply_sqrt_equivalisation("mi") 
+  apply_sqrt_equivalisation("mi") %>% 
+  map(~ .x %>% select(-hifactor, -hi33, -hiprivate, -currency, -grossnet, -hwgt, -hwgta))
+
 
 print(paste0("Preparation of the data with PPP adjustment, finished on ", format(Sys.time(), "%d-%B-%Y %H:%M:%S")))
 
