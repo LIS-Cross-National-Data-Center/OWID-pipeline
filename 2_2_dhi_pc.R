@@ -56,14 +56,20 @@ palma_ratio <- prep_data %>%
 
 print(paste0("Computation of Palma Ratio for ", var_for_log, " - ", eqv_for_log, " finished on ", format(Sys.time(), "%d-%B-%Y %H:%M:%S")))
 
+# 23rd December 2025 email, apparently for the inequality dashboard they still use the poverty rate, not the income share.
+#share_below_50_median <- prep_data %>%
+#  share_below_half_median("dhi_pc", "new_wgt") %>%
+#  structure_to_plot(print_columns = FALSE) %>%
+#  mutate(indicator = "Share below half median")
+
+#print(paste0("Computation of income share for hhd's below 50% Median for ", var_for_log, " - ", eqv_for_log, " finished on ", format(Sys.time(), "%d-%B-%Y %H:%M:%S")))
 
 share_below_50_median <- prep_data %>%
-  share_below_half_median("dhi_pc", "new_wgt") %>%
+  run_weighted_relative_poverty("dhi_pc", "new_wgt", times_median = 0.5) %>%
   structure_to_plot(print_columns = FALSE) %>%
   mutate(indicator = "Share below half median")
 
-print(paste0("Computation of income share for hhd's below 50% Median for ", var_for_log, " - ", eqv_for_log, " finished on ", format(Sys.time(), "%d-%B-%Y %H:%M:%S")))
-
+print(paste0("Computation of population share for hhd's below 50% Median for ", var_for_log, " - ", eqv_for_log, " finished on ", format(Sys.time(), "%d-%B-%Y %H:%M:%S")))
 
 ratio_90_10 <- prep_data %>%
   run_weighted_ratios(
@@ -284,11 +290,11 @@ print(paste0("Computation of Poverty rate (reltv_pvt) for ", var_for_log, " - ",
 
 
 
-# average_poverty_shortfall_relt_to_median
+# Average_poverty_shortfall_relt_to_median
 results <- list()
 for (line in thresholds) {
   a <- run_weighted_poverty_shortfall(
-    prep_data,
+    prep_data_ppp_adj,
     var_name = "dhi_pc",
     wgt_name = "new_wgt",
     times_median = line,
@@ -302,7 +308,7 @@ average_poverty_shortfall_relt_to_median <- bind_rows(results)
 print(paste0("Computation of Average Poverty Shortfall (reltv_pvt) for ", var_for_log, " - ", eqv_for_log, " finished on ", format(Sys.time(), "%d-%B-%Y %H:%M:%S")))
 
 
-# percentage_poverty_shortfall_relt_to_median
+# Percentage_poverty_shortfall_relt_to_median
 results <- list()
 for (line in thresholds) {
   a <- run_weighted_poverty_shortfall(
@@ -326,7 +332,7 @@ print(paste0("Computation of % Poverty Shortfall (reltv_pvt) for ", var_for_log,
 results <- list()
 for (line in thresholds) {
   a <- total_shortfall_relative( 
-    prep_data,
+    prep_data_ppp_adj,
     var_name = "dhi_pc",
     wgt_name = "new_wgt",
     times_median = line
@@ -377,7 +383,7 @@ write_csv(relative_poverty_figures, paste0(output_path_int, "relative_poverty_dh
 
 
 
-# 4) Poverty (absolute) thresholds as daily monetary threshold in international dollars at 2017 PPPs -----------------------
+# 4) Poverty (absolute) thresholds as daily monetary threshold in international dollars at 2021 PPPs -----------------------
 
 poverty_lines <- c(
   3,

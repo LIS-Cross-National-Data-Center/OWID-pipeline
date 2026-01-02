@@ -3,12 +3,19 @@
 # Gonçalo Marques 
 # 21st October 2025
 
+# --------------- MANUAL DATASET SELECTION ------------------------------------
+
+mds = "upload" # 2 options: 1) "all", 2) "upload"
+
+#------------------------------------------------------------------------------
+
 
 # libraries ---------------------------------------------------------------
 
 library(tidyverse)
 library(lissyrtools)
-library(assertthat)
+library(lubridate)
+library(assertthat)  
 library(tictoc)
 library(furrr)
 
@@ -31,10 +38,10 @@ sink(log_file, type = "message")
 
 
 # ---- SIGNAL START ----
-paste0("==============================")
-paste0("Starting full data pipeline")
-paste0(format(Sys.time(), "%d-%B-%Y %H:%M:%S"))
-paste0("==============================")
+cat("==============================\n")
+cat("Starting full data pipeline\n")
+cat(format(Sys.time(), "%d-%B-%Y %H:%M:%S"), "\n")
+cat("==============================\n\n")
 
 
 
@@ -42,11 +49,12 @@ paste0("==============================")
 
 # Data Preparation
 
-paste0(">>> Running data preparation (1_data_prep.R)")
+cat(">>> Running data preparation (1_data_prep.R)\n")
 source("1_data_prep.R")
 
 # Computation of aggregate figures ------------------------------------------------
-paste0(">>> Starting aggregate figure computations <<<")
+cat(">>> Starting aggregate figure computations <<<", "\n")
+cat("Progress can be checked by refreshing S:/Projects/2025-OWID-Pipeline/outputs", "\n")
 
 plan(multisession, workers = 4)  # works on Windows & macOS/Linux
 
@@ -57,8 +65,9 @@ scripts <- c(
   "2_4_mi_pc.R"
 )
 
-results <- future_map(scripts, function(script) {
-  paste0("Running ", script)
+
+results <- furrr::future_map(scripts, function(script) {
+  cat("Running: ", script, "\n")
   library(tidyverse)
   library(lissyrtools)
   source("path_definer.R")
@@ -66,21 +75,21 @@ results <- future_map(scripts, function(script) {
   source(script)
 
 },
-.options = furrr_options(globals = c("prep_data", "prep_data_ppp_adj", "prep_data_mi", "prep_data_ppp_adj_mi"))
+.options = furrr::furrr_options(globals = c("prep_data", "prep_data_ppp_adj", "prep_data_mi", "prep_data_ppp_adj_mi"))
 )
 
   
 # Restructuring & Final Output ------------------------------------------------
 
-paste0(">>> Running final restructuring (3_final_restructuring_OWID.R)")
+cat(">>> Running final restructuring (3_final_restructuring_OWID.R)\n")
 source("3_final_restructuring_OWID.R")
 
 
 
-paste0("==============================")
-paste0("Pipeline finished successfully")
-paste0(format(Sys.time(), "%d-%B-%Y %H:%M:%S"))
-paste0("==============================")
+cat("==============================\n")
+cat("Pipeline finished successfully\n")
+cat(format(Sys.time(), "%d-%B-%Y %H:%M:%S\n"))
+cat("==============================\n")
 
 sink()
 sink(type = "message")

@@ -4,12 +4,18 @@
 variables_owid <- c("dhi", "hifactor", "hiprivate", "hi33", "grossnet")
 
 tic()
+if (mds == "all"){
 full_data_hhd <- lissyuse(
-  data = lissyrtools::get_countries_lis(),
+  data = lissyrtools::get_countries_lis(), 
   vars = variables_owid
 ) # 152.78 sec elapsed / 172.73
+} else if(mds == "upload"){
+full_data_hhd <- lissyuse(
+  data = stringr::str_sub(lispostharmtools::identify_ikf_files_from_upload(), 1,4), 
+  vars = variables_owid
+)
+}
 toc()
-
 
 # 2) Market Income  ---------------------------------------------------------------
 data_with_mi <- purrr::map(
@@ -26,12 +32,12 @@ data_with_mi <- purrr::map(
       ) {
         mi
       } else {
-        NA
+        NA_real_
       },
       mi = if_else(
         grossnet < 200,
         mi,
-        NA
+        NA_real_
       )
     )
 )
@@ -67,6 +73,9 @@ dnames_in_LIS <- lissyrtools::datasets %>% filter(database == "LIS") %>% select(
 ccyy_with_PPPs <- lissyrtools::deflators %>% mutate(ccyy = str_c(iso2, str_sub(year,3,4))) %>% select(ccyy) %>% pull() %>% unique()
 intersection <- intersect(dnames_in_LIS, ccyy_with_PPPs)
 to_remove_when_data_ppp_adjusted  <-  str_c(dnames_in_LIS[!(dnames_in_LIS %in% intersection)], "h")
+
+print(paste0("For PPP-adjusted data the following datasets are going to be ignored: ", 
+              paste(to_remove_when_data_ppp_adjusted, collapse = ", ")))
 
 
 prep_data_ppp_adj <- purrr::map(
