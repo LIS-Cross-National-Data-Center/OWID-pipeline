@@ -57,12 +57,12 @@ prep_data <- purrr::map(
     filter(!is.na(dhi)) %>%
     mutate(new_wgt = hwgt * nhhmem)
 ) %>%
-  apply_iqr_top_bottom_coding("dhi", "hwgt", times = 3, type = "type_4") %>% # before and in Stata: "type_2" ?
-  apply_iqr_top_bottom_coding("mi", "hwgt", times = 3, type = "type_4") %>% # before and in Stata: "type_2" ?
+  lissyrtools::apply_iqr_top_bottom_coding("dhi", "hwgt", times = 3, type = "type_4") %>% # before and in Stata: "type_2" ?
+  lissyrtools::apply_iqr_top_bottom_coding("mi", "hwgt", times = 3, type = "type_4") %>% # before and in Stata: "type_2" ?
   purrr::map( ~ .x %>% mutate(dhi_pc = dhi / nhhmem)) %>% 
   purrr::map( ~ .x %>% mutate(mi_pc = mi / nhhmem)) %>% 
-  apply_sqrt_equivalisation("dhi") %>% 
-  apply_sqrt_equivalisation("mi") %>% 
+  lissyrtools::apply_sqrt_equivalisation("dhi") %>% 
+  lissyrtools::apply_sqrt_equivalisation("mi") %>% 
   map(~ .x %>% select(-hifactor, -hi33, -hiprivate, -currency, -grossnet, -hwgt, -hwgta))
 
 print(paste0("Preparation of the data without PPP adjustment, finished on ", format(Sys.time(), "%d-%B-%Y %H:%M:%S")))
@@ -84,14 +84,14 @@ prep_data_ppp_adj <- purrr::map(
     filter(!is.na(dhi)) %>%
     mutate(new_wgt = hwgt * nhhmem)
 ) %>%
-  apply_ppp_adjustment("dhi", transformation = "lisppp", database = "lis", base_year_ppp = 2021) %>%
-  apply_ppp_adjustment("mi", transformation = "lisppp", database = "lis", base_year_ppp = 2021) %>%
-  apply_iqr_top_bottom_coding("dhi", "hwgt", times = 3, type = "type_4") %>% # before and in Stata: "type_2" ?
-  apply_iqr_top_bottom_coding("mi", "hwgt", times = 3, type = "type_4") %>% # before and in Stata: "type_2" ?
+  lissyrtools::apply_ppp_adjustment("dhi", transformation = "lisppp", database = "lis", base_year_ppp = 2021) %>%
+  lissyrtools::apply_ppp_adjustment("mi", transformation = "lisppp", database = "lis", base_year_ppp = 2021) %>%
+  lissyrtools::apply_iqr_top_bottom_coding("dhi", "hwgt", times = 3, type = "type_4") %>% # before and in Stata: "type_2" ?
+  lissyrtools::apply_iqr_top_bottom_coding("mi", "hwgt", times = 3, type = "type_4") %>% # before and in Stata: "type_2" ?
   purrr::map( ~ .x %>% mutate(dhi_pc = dhi / nhhmem)) %>% 
   purrr::map( ~ .x %>% mutate(mi_pc = mi / nhhmem)) %>% 
-  apply_sqrt_equivalisation("dhi") %>%
-  apply_sqrt_equivalisation("mi") %>% 
+  lissyrtools::apply_sqrt_equivalisation("dhi") %>%
+  lissyrtools::apply_sqrt_equivalisation("mi") %>% 
   map(~ .x %>% select(-hifactor, -hi33, -hiprivate, -currency, -grossnet, -hwgt, -hwgta))
 
 
