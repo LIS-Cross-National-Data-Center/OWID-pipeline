@@ -5,12 +5,12 @@ variables_owid <- c("dhi", "hifactor", "hiprivate", "hi33", "grossnet")
 
 tic()
 if (mds == "all"){
-full_data_hhd <- lissyuse(
+full_data_hhd <- lissyrtools::lissyuse(
   data = lissyrtools::get_countries_lis(), 
   vars = variables_owid
 ) # 152.78 sec elapsed / 172.73
 } else if(mds == "upload"){
-full_data_hhd <- lissyuse(
+full_data_hhd <- lissyrtools::lissyuse(
   data = stringr::str_sub(lispostharmtools::identify_ikf_files_from_upload(), 1,4), 
   vars = variables_owid
 )
