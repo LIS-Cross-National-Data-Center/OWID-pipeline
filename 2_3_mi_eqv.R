@@ -189,7 +189,7 @@ print(paste0("Computation of Deciles averages for ", var_for_log, " - ", eqv_for
 
 
 percentiles <- prep_data_ppp_adj_mi %>%
-  lissyrtools::lissyrtools::run_weighted_percentiles("mi", "new_wgt", probs = seq(0.01, 0.99, 0.01)) %>%
+  lissyrtools::run_weighted_percentiles("mi", "new_wgt", probs = seq(0.01, 0.99, 0.01)) %>%
   lissyrtools::structure_to_plot(print_columns = FALSE) %>% 
   mutate(indicator = str_c("p_", str_sub(category, 1, -2))) %>%
   select(-category)
